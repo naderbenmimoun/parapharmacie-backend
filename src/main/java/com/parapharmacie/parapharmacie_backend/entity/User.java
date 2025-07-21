@@ -56,4 +56,12 @@ public class User {
 
     public String getMotDePasse() { return motDePasse; }
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
+    public Sexe getSexe() {
+        return sexe;
+    }
+
+    // Setter pour sexe
+    public void setSexe(Sexe sexe) {
+        this.sexe = sexe;
+    }
 }
