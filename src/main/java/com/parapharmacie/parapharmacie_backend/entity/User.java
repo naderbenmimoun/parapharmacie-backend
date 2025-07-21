@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -27,24 +27,42 @@ public class User {
     @Column(nullable = false)
     private String motDePasse;
 
-
     @NotNull(message = "Le sexe est obligatoire")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     @JsonProperty("sexe")
     private Sexe sexe;
 
+    @Column(name = "date_creation")
+    private LocalDateTime dateCreation;
+
+    @Column(name = "derniere_connexion")
+    private LocalDateTime derniereConnexion;
+
+    @Column(name = "reset_code")
+    private String resetCode;
+
+    @Column(name = "reset_code_expiration")
+    private LocalDateTime resetCodeExpiration;
+
+    @Column(name = "compte_actif")
+    private Boolean compteActif = true;
+
     // Constructeur vide (obligatoire pour JPA)
-    public User() {}
+    public User() {
+        this.dateCreation = LocalDateTime.now();
+        this.compteActif = true;
+    }
 
     // Constructeur avec paramètres
     public User(String nom, String email, String motDePasse) {
+        this();
         this.nom = nom;
         this.email = email;
         this.motDePasse = motDePasse;
     }
 
-    // Getters et Setters
+    // Getters et Setters existants
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -56,12 +74,23 @@ public class User {
 
     public String getMotDePasse() { return motDePasse; }
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
-    public Sexe getSexe() {
-        return sexe;
-    }
 
-    // Setter pour sexe
-    public void setSexe(Sexe sexe) {
-        this.sexe = sexe;
-    }
+    public Sexe getSexe() { return sexe; }
+    public void setSexe(Sexe sexe) { this.sexe = sexe; }
+
+    // Nouveaux getters/setters
+    public LocalDateTime getDateCreation() { return dateCreation; }
+    public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+
+    public LocalDateTime getDerniereConnexion() { return derniereConnexion; }
+    public void setDerniereConnexion(LocalDateTime derniereConnexion) { this.derniereConnexion = derniereConnexion; }
+
+    public String getResetCode() { return resetCode; }
+    public void setResetCode(String resetCode) { this.resetCode = resetCode; }
+
+    public LocalDateTime getResetCodeExpiration() { return resetCodeExpiration; }
+    public void setResetCodeExpiration(LocalDateTime resetCodeExpiration) { this.resetCodeExpiration = resetCodeExpiration; }
+
+    public Boolean getCompteActif() { return compteActif; }
+    public void setCompteActif(Boolean compteActif) { this.compteActif = compteActif; }
 }
