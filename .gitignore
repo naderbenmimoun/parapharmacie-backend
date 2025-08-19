@@ -1,3 +1,4 @@
+# Existant (backend)
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
@@ -31,3 +32,19 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# NOUVEAU - Frontend Angular
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+frontend/.tmp/
+frontend/.cache/
+frontend/coverage/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.DS_Store
+frontend/Thumbs.db

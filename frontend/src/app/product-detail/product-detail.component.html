@@ -1,0 +1,175 @@
+<!-- product-page.component.html -->
+<div class="container">
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Chargement du produit...</p>
+    </div>
+  } @else if (product()) {
+    <!-- Breadcrumb Navigation -->
+    <nav class="breadcrumb">
+      @for (crumb of breadcrumbs(); track crumb.label; let last = $last) {
+        @if (!crumb.active) {
+          <a [routerLink]="crumb.url" class="breadcrumb-link">
+            {{ crumb.label }}
+          </a>
+        } @else {
+          <span class="current">{{ crumb.label }}</span>
+        }
+        @if (!last) {
+          <span class="separator"> / </span>
+        }
+      }
+    </nav>
+
+    <div class="product-container">
+      <!-- Product Images Section -->
+      <div class="product-images">
+        <div class="main-image">
+          @if (currentImage()) {
+            <img [src]="currentImage()!.url" [alt]="currentImage()!.alt" class="product-image">
+          } @else {
+            <!-- Fallback mock product image -->
+            <div class="mock-product">
+              <div class="spf-badge">50+</div>
+            </div>
+          }
+        </div>
+
+        <!-- Thumbnail Navigation -->
+        <div class="thumbnail-container">
+          <button class="nav-arrow" (click)="previousImage()" type="button">
+            ‹
+          </button>
+          
+          <div class="thumbnails">
+            @for (image of product()!.images; track image.id; let i = $index) {
+              <div class="thumbnail" 
+                   [class.active]="i === selectedImageIndex()"
+                   (click)="selectImage(i)">
+                @if (image.url) {
+                  <img [src]="image.url" [alt]="image.alt" class="thumbnail-image">
+                } @else {
+                  <!-- Mock thumbnail -->
+                  <div class="mock-thumbnail">
+                    <div class="thumbnail-spf">50</div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+          
+          <button class="nav-arrow" (click)="nextImage()" type="button">
+            ›
+          </button>
+        </div>
+      </div>
+
+      <!-- Product Information Section -->
+      <div class="product-info">
+        <h1 class="product-title">{{ product()!.title }}</h1>
+
+        <!-- Rating and Reviews -->
+        <div class="rating-container">
+          <div class="stars">
+            @for (star of stars(); track $index) {
+              <span class="star" 
+                    [class.full]="star === 'full'"
+                    [class.half]="star === 'half'"
+                    [class.empty]="star === 'empty'">
+                @switch (star) {
+                  @case ('full') {
+                    <span>★</span>
+                  }
+                  @case ('half') {
+                    <span>☆</span>
+                  }
+                  @case ('empty') {
+                    <span>☆</span>
+                  }
+                }
+              </span>
+            }
+          </div>
+          <span class="reviews">{{ product()!.rating.count }} reviews</span>
+          <span class="size-info">{{ selectedSize() }}</span>
+        </div>
+
+        <!-- Price -->
+        <div class="price">{{ formattedPrice() }} {{ product()!.currency }}</div>
+
+        <!-- Description -->
+        <p class="description">{{ product()!.description }}</p>
+
+        <!-- Options Container -->
+        <div class="options-container">
+          <!-- Size Selector -->
+          <div class="size-selector">
+            <select class="size-dropdown" 
+                    [value]="selectedSize()" 
+                    (change)="onSizeChange($event)">
+              @for (size of product()!.availableSizes; track size) {
+                <option [value]="size">{{ size }}</option>
+              }
+            </select>
+          </div>
+
+          <!-- Quantity Selector -->
+          <div class="quantity-selector">
+            <button class="quantity-btn" 
+                    (click)="decreaseQuantity()" 
+                    [disabled]="!canDecreaseQuantity()"
+                    type="button">
+              −
+            </button>
+            <input type="number" 
+                   class="quantity-input" 
+                   [value]="quantity()"
+                   (input)="onQuantityChange($event)"
+                   min="1">
+            <button class="quantity-btn" 
+                    (click)="increaseQuantity()"
+                    type="button">
+              +
+            </button>
+          </div>
+
+          <!-- Add to Cart Button -->
+          <button class="add-to-cart" 
+                  [class.added]="isAddedToCart()"
+                  (click)="addToCart()"
+                  type="button">
+            @if (!isAddedToCart()) {
+              ajouter au panier
+            } @else {
+              ajouté au panier ✓
+            }
+          </button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-buttons">
+          <button class="favorites-btn" 
+                  [class.favorited]="isFavorite()"
+                  (click)="toggleFavorite()"
+                  type="button">
+            <span class="heart-icon">{{ isFavorite() ? '♥' : '♡' }}</span>
+            ajouter aux favoris
+          </button>
+          
+          <div class="guarantee">
+            remboursement avant 30 jours
+          </div>
+        </div>
+      </div>
+    </div>
+  } @else {
+    <!-- Product not found or error state -->
+    <div class="error-container">
+      <h2>Produit non trouvé</h2>
+      <p>Le produit que vous recherchez n'existe pas ou a été supprimé.</p>
+      <a routerLink="/" class="back-link">Retour à l'accueil</a>
+    </div>
+  }
+</div>

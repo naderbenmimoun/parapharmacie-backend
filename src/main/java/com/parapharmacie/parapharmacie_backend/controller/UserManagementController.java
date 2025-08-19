@@ -27,12 +27,16 @@ public class UserManagementController {
 
         AuthResponse response = userManagementService.requestPasswordReset(request);
 
+        // Modifier la réponse pour ne pas envoyer le code dans le message
         if (response.getMessage().contains("envoyé") || response.getMessage().contains("CODE")) {
-            return ResponseEntity.ok(response);
+            // remplacer le message par un message générique
+            String message = "Code de reset envoyé par email à : " + request.getEmail();
+            return ResponseEntity.ok(new AuthResponse(message));
         } else {
             return ResponseEntity.badRequest().body(response);
         }
     }
+
 
     // Confirmer reset mot de passe
     @PostMapping("/reset-password-confirm")
@@ -149,9 +153,9 @@ public class UserManagementController {
     }
 
     // Test du controller
-    @GetMapping("/test")
+  /*  @GetMapping("/test")
     public ResponseEntity<String> test() {
         System.out.println("🧪 GET /api/user/test appelé");
         return ResponseEntity.ok("🎉 User Management Controller fonctionne !");
-    }
+    }*/
 }

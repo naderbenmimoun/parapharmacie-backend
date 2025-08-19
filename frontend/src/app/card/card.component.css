@@ -1,0 +1,112 @@
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    background: white;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-image-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.favorite-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.favorite-btn:hover {
+    background-color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.favorite-btn.favorited {
+    background-color: #dc3545;
+    color: white;
+}
+
+.favorite-btn.favorited:hover {
+    background-color: #dc3545;
+    transform: scale(1.1);
+}
+
+.heart-icon {
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c5530;
+    margin-bottom: 0.75rem;
+    font-family: 'Nunito', sans-serif;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    font-family: 'Poppins', sans-serif;
+}
+
+.card-price {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-family: 'Nunito', sans-serif;
+}
+
+.btn-primary {
+    background-color: #45a049;
+    border-color: #45a049;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #2c5530;
+    border-color: #2c5530;
+    transform: translateY(-2px);
+}
+
+.card-icon{
+    width: 20px;
+    height: 20px;
+    .cls-1{fill:white} ;
+}

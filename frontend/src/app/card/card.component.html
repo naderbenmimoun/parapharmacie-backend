@@ -1,0 +1,20 @@
+<div class="card" style="width: 18rem;">
+  <div class="card-image-container">
+    <img [src]="product.images[0].url" class="card-img-top" [alt]="product.images[0].alt">
+    <button class="favorite-btn" 
+            (click)="toggleFavorite($event)"
+            [class.favorited]="isFavorite()"
+            type="button">
+      <span class="heart-icon">{{ isFavorite() ? '♥' : '♡' }}</span>
+    </button>
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">{{ product.title }}</h5>
+    <div class="card-price">{{product.price}} TND</div>
+    <a class="btn btn-primary" [routerLink]="['/product', product.id]">Ajouter au panier                 
+        <svg  class="card-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+            <g id="shopping_bag" data-name="shopping bag"><path class="cls-1" d="M26.19 10.9A3.21 3.21 0 0 0 23 8h-1a6.4 6.4 0 0 0-1.58-3.91 5.78 5.78 0 0 0-8.9 0A6.4 6.4 0 0 0 10 8H9a3.21 3.21 0 0 0-3.2 2.9L4.25 26.46A3.21 3.21 0 0 0 7.45 30h17.1a3.21 3.21 0 0 0 3.2-3.54zm-.74 16.7a1.18 1.18 0 0 1-.9.4H7.45a1.18 1.18 0 0 1-.9-.4 1.17 1.17 0 0 1-.31-.94L7.8 11.1A1.21 1.21 0 0 1 9 10h2.25a1 1 0 0 0 .18-.07l.16-.1a.86.86 0 0 0 .14-.13.72.72 0 0 0 .11-.15 1.3 1.3 0 0 0 .08-.17.71.71 0 0 0 0-.2A.5.5 0 0 0 12 9v-.13a4.41 4.41 0 0 1 1.06-3.46A4 4 0 0 1 16 4a4 4 0 0 1 3 1.41A4.41 4.41 0 0 1 20 8h-5a1 1 0 0 0 0 2h8a1.21 1.21 0 0 1 1.21 1.1l1.56 15.56a1.17 1.17 0 0 1-.32.94z"/><path class="cls-1" d="M11 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2zM22 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2z"/></g>
+        </svg>
+    </a>
+  </div>
+</div>
