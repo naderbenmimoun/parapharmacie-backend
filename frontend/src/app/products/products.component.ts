@@ -22,7 +22,7 @@ import { Product } from '../product-detail/product-detail.component';
           @for (product of products(); track product.id) {
             <div class="product-card">
               <div class="product-image">
-                @if (product.images[0]?.url) {
+                @if (product.images[0] && product.images[0].url) {
                   <img [src]="product.images[0].url" [alt]="product.images[0].alt">
                 } @else {
                   <div class="mock-product-image">

@@ -71,9 +71,9 @@ import { CartService, CartItem } from '../services/cart.service';
               <span>{{ totalPrice().toLocaleString('fr-FR') }} TND</span>
             </div>
             
-            <button class="checkout-btn">
-              Passer la commande
-            </button>
+         <button class="checkout-btn" routerLink="/checkout">
+          Passer la commande
+         </button>
             
             <button class="continue-shopping" routerLink="/products">
               Continuer les achats

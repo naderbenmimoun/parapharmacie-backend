@@ -7,6 +7,8 @@ import { ProductsComponent } from './products/products.component';
 import { CartComponent } from './cart/cart.component';
 import { FavoritesComponent } from './favorites/favorites.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
+import { CheckoutComponent } from './checkout/checkout.component';
+import { OrderConfirmationComponent } from './order-confirmation/order-confirmation.component';
 
 export const routes: Routes = [
     { path: "", redirectTo: "home", pathMatch: "full" },
@@ -16,8 +18,9 @@ export const routes: Routes = [
     { path: "products", title: "Produits", component: ProductsComponent },
     { path: "product/:id", title: "Détail Produit", component: ProductDetailComponent },
     { path: "cart", title: "Panier", component: CartComponent },
+    { path: "checkout", title: "Checkout", component: CheckoutComponent },
+    { path: "order-confirmation", title: "Commande confirmée", component: OrderConfirmationComponent },
     { path: "favorites", title: "Mes Favoris", component: FavoritesComponent },
     { path: "product_detail", title: "Product_detail", component: ProductDetailComponent },
-        { path: "forgotPassword", title: "forgotPassword", component: ForgotPasswordComponent }
-
+    { path: "forgotPassword", title: "forgotPassword", component: ForgotPasswordComponent }
 ];

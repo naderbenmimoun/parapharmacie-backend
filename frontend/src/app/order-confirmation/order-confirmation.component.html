@@ -1,0 +1,144 @@
+<div class="confirmation-container">
+  @if (isLoading()) {
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Chargement des détails de votre commande...</p>
+    </div>
+  } @else {
+    <!-- Header de confirmation -->
+    <div class="confirmation-header">
+      <div class="success-icon">🎉</div>
+      <h1>Commande confirmée !</h1>
+      <p class="confirmation-message">
+        Merci pour votre commande ! Nous avons bien reçu votre demande et nous la préparons avec soin.
+      </p>
+    </div>
+
+    <!-- Détails de la commande -->
+    <div class="order-details-card">
+      <div class="order-header">
+        <h2>📋 Détails de votre commande</h2>
+        <div class="order-reference">
+          <strong>Référence : {{ orderReference() }}</strong>
+        </div>
+      </div>
+
+      <div class="order-info-grid">
+        <div class="info-item">
+          <div class="info-label">📅 Date de commande</div>
+          <div class="info-value">{{ getCurrentDate() }}</div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">📊 Statut</div>
+          <div class="info-value status">
+            <span class="status-badge">⏳ En attente de traitement</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">💳 Méthode de paiement</div>
+          <div class="info-value">
+            <span class="payment-method">💳 Paiement sécurisé</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <div class="info-label">🚚 Livraison</div>
+          <div class="info-value">Livraison gratuite sous 3-5 jours</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prochaines étapes -->
+    <div class="next-steps-card">
+      <h2>📬 Prochaines étapes</h2>
+      <div class="steps-timeline">
+        <div class="step active">
+          <div class="step-icon">✅</div>
+          <div class="step-content">
+            <h3>Commande reçue</h3>
+            <p>Nous avons bien reçu votre commande et nous la vérifions.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-icon">📦</div>
+          <div class="step-content">
+            <h3>Préparation</h3>
+            <p>Votre commande sera préparée dans nos entrepôts sous 24h.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-icon">🚚</div>
+          <div class="step-content">
+            <h3>Expédition</h3>
+            <p>Votre commande sera expédiée et vous recevrez un numéro de suivi.</p>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-icon">🎁</div>
+          <div class="step-content">
+            <h3>Livraison</h3>
+            <p>Réception de votre commande sous 3-5 jours ouvrables.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Informations importantes -->
+    <div class="important-info-card">
+      <h2>📧 Informations importantes</h2>
+      <div class="info-list">
+        <div class="info-point">
+          <span class="point-icon">📨</span>
+          <span>Vous recevrez un email de confirmation avec tous les détails de votre commande.</span>
+        </div>
+        <div class="info-point">
+          <span class="point-icon">🔍</span>
+          <span>Vous pouvez suivre l'état de votre commande dans votre espace client.</span>
+        </div>
+        <div class="info-point">
+          <span class="point-icon">📞</span>
+          <span>Notre service client est disponible pour toute question au +216 XX XXX XXX.</span>
+        </div>
+        <div class="info-point">
+          <span class="point-icon">↩️</span>
+          <span>Retours gratuits sous 30 jours si vous n'êtes pas satisfait.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="action-buttons">
+      <a routerLink="/home" class="btn btn-primary">
+        🏠 Retour à l'accueil
+      </a>
+      <a routerLink="/products" class="btn btn-secondary">
+        🛍️ Continuer mes achats
+      </a>
+    </div>
+
+    <!-- Contact et support -->
+    <div class="support-section">
+      <h3>❓ Besoin d'aide ?</h3>
+      <p>Notre équipe est là pour vous accompagner :</p>
+      <div class="support-options">
+        <div class="support-item">
+          <span class="support-icon">📧</span>
+         <span>support&#64;parapharmacie.tn</span>
+        </div>
+        <div class="support-item">
+          <span class="support-icon">📞</span>
+          <span>+216 XX XXX XXX</span>
+        </div>
+        <div class="support-item">
+          <span class="support-icon">💬</span>
+          <span>Chat en ligne disponible 24/7</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

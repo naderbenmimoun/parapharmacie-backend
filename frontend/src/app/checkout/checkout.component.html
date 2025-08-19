@@ -1,0 +1,178 @@
+<div class="checkout-container">
+  <div class="checkout-header">
+    <h1>Finaliser votre commande</h1>
+    <div class="breadcrumb">
+      <a routerLink="/cart">Panier</a> > <span class="current">Checkout</span>
+    </div>
+  </div>
+
+  <div class="checkout-content">
+    <!-- Colonne de gauche - Formulaire -->
+    <div class="checkout-form">
+      <form (ngSubmit)="onSubmit()" #checkoutForm="ngForm">
+        
+        <!-- Informations de livraison -->
+        <div class="form-section">
+          <h2>📍 Informations de livraison</h2>
+          
+          <div class="form-group">
+            <label for="adresse">Adresse de livraison *</label>
+            <textarea 
+              id="adresse"
+              [(ngModel)]="formData.adresseLivraison"
+              name="adresse"
+              placeholder="Votre adresse complète..."
+              required
+              rows="3"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="telephone">Numéro de téléphone *</label>
+            <input 
+              type="tel"
+              id="telephone"
+              [(ngModel)]="formData.telephone"
+              name="telephone"
+              placeholder="+216 XX XXX XXX"
+              required>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notes (optionnel)</label>
+            <textarea 
+              id="notes"
+              [(ngModel)]="formData.notes"
+              name="notes"
+              placeholder="Instructions spéciales, code d'accès..."
+              rows="2"></textarea>
+          </div>
+        </div>
+
+        <!-- Méthode de paiement -->
+        <div class="form-section">
+          <h2>💳 Méthode de paiement</h2>
+          
+          <div class="payment-methods">
+            @for (method of paymentMethods; track method.value) {
+              <div class="payment-option">
+                <input 
+                  type="radio"
+                  [id]="method.value"
+                  [(ngModel)]="formData.methodePaiement"
+                  [value]="method.value"
+                  name="methodePaiement"
+                  (change)="onPaymentMethodChange()">
+                <label [for]="method.value" class="payment-label">
+                  <span class="payment-icon">{{ method.icon }}</span>
+                  <span class="payment-text">{{ method.label }}</span>
+                  @if (method.value === 'STRIPE_CARD') {
+                    <span class="payment-badge">Sécurisé</span>
+                  }
+                </label>
+              </div>
+            }
+          </div>
+
+          <!-- Stripe Card Element -->
+          @if (formData.methodePaiement === 'STRIPE_CARD') {
+            <div class="stripe-card-container">
+              <label>Informations de carte</label>
+              <div id="card-element" class="stripe-card-element"></div>
+              <div class="stripe-security">
+                🔒 Paiement sécurisé par Stripe
+              </div>
+            </div>
+          }
+
+          @if (formData.methodePaiement === 'CASH_ON_DELIVERY') {
+            <div class="payment-info">
+              💵 Vous paierez lors de la livraison. Préparez la somme exacte.
+            </div>
+          }
+
+          @if (formData.methodePaiement === 'BANK_TRANSFER') {
+            <div class="payment-info">
+              🏦 Vous recevrez les détails du virement par email après confirmation.
+            </div>
+          }
+        </div>
+
+        <!-- Messages -->
+        @if (errorMessage()) {
+          <div class="message error">
+            ❌ {{ errorMessage() }}
+          </div>
+        }
+
+        @if (successMessage()) {
+          <div class="message success">
+            ✅ {{ successMessage() }}
+          </div>
+        }
+
+        <!-- Bouton de soumission -->
+        <button 
+          type="submit" 
+          class="checkout-btn"
+          [disabled]="isProcessing() || checkoutForm.invalid"
+          [class.processing]="isProcessing()">
+          @if (isProcessing()) {
+            <span class="spinner"></span>
+            Traitement en cours...
+          } @else {
+            @if (formData.methodePaiement === 'STRIPE_CARD') {
+              Payer {{ totalPrice().toLocaleString('fr-FR') }} TND
+            } @else {
+              Confirmer la commande
+            }
+          }
+        </button>
+      </form>
+    </div>
+
+    <!-- Colonne de droite - Résumé -->
+    <div class="order-summary">
+      <h2>📦 Résumé de votre commande</h2>
+      
+      <div class="summary-items">
+        @for (item of cartItems(); track item.productId + item.size) {
+          <div class="summary-item">
+            <div class="item-image">
+              @if (item.imageUrl) {
+                <img [src]="item.imageUrl" [alt]="item.title">
+              } @else {
+                <div class="placeholder-image">📦</div>
+              }
+            </div>
+            <div class="item-details">
+              <h4>{{ item.title }}</h4>
+              <p>Taille: {{ item.size }} | Qté: {{ item.quantity }}</p>
+              <span class="item-price">{{ (item.price * item.quantity).toLocaleString('fr-FR') }} TND</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <div class="summary-totals">
+        <div class="total-row">
+          <span>Sous-total:</span>
+          <span>{{ totalPrice().toLocaleString('fr-FR') }} TND</span>
+        </div>
+        <div class="total-row">
+          <span>Livraison:</span>
+          <span>Gratuite</span>
+        </div>
+        <div class="total-row final-total">
+          <span>Total:</span>
+          <span>{{ totalPrice().toLocaleString('fr-FR') }} TND</span>
+        </div>
+      </div>
+
+      <div class="security-badges">
+        <div class="badge">🔒 Paiement sécurisé</div>
+        <div class="badge">📦 Livraison gratuite</div>
+        <div class="badge">↩️ Retour 30 jours</div>
+      </div>
+    </div>
+  </div>
+</div>
