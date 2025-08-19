@@ -1,0 +1,195 @@
+<div class="face-analysis-container">
+  <div class="analysis-header">
+    <h2>🎯 Analyse de Votre Visage</h2>
+    <p>Obtenez des recommandations personnalisées basées sur votre type de peau</p>
+    
+    <!-- Indicateur de chargement des modèles -->
+    @if (!modelsLoaded()) {
+      <div class="loading-models">
+        <div class="spinner"></div>
+        <p>Chargement des modèles IA...</p>
+      </div>
+    }
+  </div>
+
+  <!-- Étape 1: Demande de permission -->
+  @if (currentStep() === 'permission' && modelsLoaded()) {
+    <div class="permission-step">
+      <div class="camera-icon">📷</div>
+      <h3>Accès à la Caméra</h3>
+      <p>Nous avons besoin d'accéder à votre caméra pour analyser votre visage et vous proposer les meilleurs produits.</p>
+      <button class="start-btn" (click)="startCamera()">
+        Commencer l'Analyse
+      </button>
+    </div>
+  }
+
+  <!-- Étape 2: Aperçu vidéo avec détection -->
+  @if (currentStep() === 'camera') {
+    <div class="camera-step">
+      <div class="video-container">
+        <video #videoElement autoplay playsinline [class.mirror]="true"></video>
+        <div class="face-guide">
+          <div class="face-oval" [class.detected]="faceDetected()"></div>
+        </div>
+        
+        <!-- Indicateur de détection -->
+        <div class="detection-status" [class.detected]="faceDetected()">
+          @if (faceDetected()) {
+            <span class="status-icon">✅</span>
+            <span>Visage détecté</span>
+          } @else {
+            <span class="status-icon">🔍</span>
+            <span>Recherche de visage...</span>
+          }
+        </div>
+      </div>
+      
+      <div class="camera-controls">
+        <button class="capture-btn" 
+                (click)="capturePhoto()" 
+                [disabled]="!cameraReady() || !faceDetected()">
+          📸 Capturer Photo
+        </button>
+        <button class="stop-btn" (click)="stopCamera()">
+          Arrêter
+        </button>
+      </div>
+      
+      <div class="instructions">
+        <p>👤 Positionnez votre visage dans l'ovale</p>
+        <p>💡 Assurez-vous d'avoir un bon éclairage</p>
+        <p>🎯 Le bouton se débloquera quand un visage sera détecté</p>
+      </div>
+    </div>
+  }
+
+  <!-- Étape 3: Photo capturée -->
+  @if (currentStep() === 'captured') {
+    <div class="captured-step">
+      <div class="photo-preview">
+        <img [src]="getCapturedImage()" alt="Photo capturée" class="captured-photo">
+      </div>
+      
+      <div class="photo-actions">
+        <button class="retry-btn" (click)="retakePhoto()">
+          🔄 Reprendre Photo
+        </button>
+        <button class="analyze-btn" (click)="analyzePhoto()">
+          🎯 Analyser cette Photo
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Étape 4: Analyse en cours -->
+  @if (currentStep() === 'analyzing') {
+    <div class="analyzing-step">
+      <div class="analysis-animation">
+        <div class="brain-icon">🧠</div>
+        <div class="scanning-line"></div>
+      </div>
+      <h3>Analyse en cours...</h3>
+      <p>Notre IA analyse votre visage pour vous proposer les meilleurs produits</p>
+      <div class="progress-steps">
+        <div class="step active">🔍 Détection du visage</div>
+        <div class="step active">📊 Analyse des caractéristiques</div>
+        <div class="step active">💡 Génération des recommandations</div>
+      </div>
+    </div>
+  }
+
+  <!-- Étape 5: Résultats détaillés avec vrais produits -->
+  @if (currentStep() === 'results' && analysisResults()) {
+    <div class="results-step">
+      <h3>✨ Analyse Terminée</h3>
+      
+      <div class="analysis-summary">
+        <div class="result-card">
+          <h4>📊 Vos Caractéristiques</h4>
+          <div class="characteristic">
+            <span class="label">Âge estimé:</span>
+            <span class="value">{{ analysisResults().estimatedAge }}</span>
+          </div>
+          <div class="characteristic">
+            <span class="label">Type de peau:</span>
+            <span class="value">{{ analysisResults().skinType }}</span>
+          </div>
+          <div class="characteristic">
+            <span class="label">Forme du visage:</span>
+            <span class="value">{{ analysisResults().faceShape }}</span>
+          </div>
+          <div class="characteristic">
+            <span class="label">Confiance IA:</span>
+            <span class="value">{{ (analysisResults().confidence * 100).toFixed(1) }}%</span>
+          </div>
+        </div>
+
+        <div class="tips-card">
+          <h4>💡 Conseils Personnalisés</h4>
+          <ul class="tips-list">
+            @for (tip of personalizedTips(); track tip) {
+              <li class="tip-item">{{ tip }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+
+      <!-- 🛒 NOUVELLE SECTION : Produits Recommandés -->
+      @if (productRecommendations().length > 0) {
+        <div class="products-section">
+          <h4>🛍️ Produits Recommandés pour Vous</h4>
+          <div class="products-grid">
+            @for (recommendation of productRecommendations(); track recommendation.product.id) {
+              <div class="product-recommendation">
+                <div class="product-card">
+                  <div class="product-image">
+                    @if (recommendation.product.images[0]?.url) {
+                      <img [src]="recommendation.product.images[0].url" 
+                           [alt]="recommendation.product.images[0].alt">
+                    } @else {
+                      <div class="placeholder-image">📦</div>
+                    }
+                  </div>
+                  
+                  <div class="product-info">
+                    <h5 class="product-title">{{ recommendation.product.title }}</h5>
+                    <p class="recommendation-reason">{{ recommendation.reason }}</p>
+                    <div class="product-price">
+                      {{ recommendation.product.price.toLocaleString('fr-FR') }} {{ recommendation.product.currency }}
+                    </div>
+                    
+                    <div class="product-actions">
+                      <button class="add-to-cart-btn" (click)="addToCart(recommendation)">
+                        🛒 Ajouter au panier
+                      </button>
+                      <a class="view-details-btn" [routerLink]="['/product', recommendation.product.id]">
+                        👁️ Voir détails
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="results-actions">
+        <button class="new-analysis-btn" (click)="resetAnalysis()">
+          🔄 Nouvelle Analyse
+        </button>
+        <button class="shop-btn" routerLink="/products">
+          🛒 Voir Tous les Produits
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Messages d'erreur -->
+  @if (errorMessage()) {
+    <div class="error-message">
+      ⚠️ {{ errorMessage() }}
+    </div>
+  }
+</div>

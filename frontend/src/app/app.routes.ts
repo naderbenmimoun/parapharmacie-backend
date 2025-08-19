@@ -9,6 +9,8 @@ import { FavoritesComponent } from './favorites/favorites.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { CheckoutComponent } from './checkout/checkout.component';
 import { OrderConfirmationComponent } from './order-confirmation/order-confirmation.component';
+import { FaceAnalysisComponent } from './face-analysis/face-analysis.component';
+
 
 export const routes: Routes = [
     { path: "", redirectTo: "home", pathMatch: "full" },
@@ -22,5 +24,6 @@ export const routes: Routes = [
     { path: "order-confirmation", title: "Commande confirmée", component: OrderConfirmationComponent },
     { path: "favorites", title: "Mes Favoris", component: FavoritesComponent },
     { path: "product_detail", title: "Product_detail", component: ProductDetailComponent },
-    { path: "forgotPassword", title: "forgotPassword", component: ForgotPasswordComponent }
+    { path: "forgotPassword", title: "forgotPassword", component: ForgotPasswordComponent },
+    { path: "face-analysis", title: "Analyse Faciale", component: FaceAnalysisComponent }
 ];
