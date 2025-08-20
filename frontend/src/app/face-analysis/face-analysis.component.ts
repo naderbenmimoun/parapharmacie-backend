@@ -1,9 +1,11 @@
-import { Component, ViewChild, ElementRef, signal, OnInit, inject } from '@angular/core';
+import { Component, ViewChild, ElementRef, signal, OnInit, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import * as faceapi from 'face-api.js';
 import { RecommendationService, ProductRecommendation } from '../services/recommendation.service';
 import { CartService } from '../services/cart.service';
+import { DeepseekAiService, FaceAnalysisData, AIAnalysisResult } from '../services/deepseek-ai.service';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-face-analysis',
@@ -12,28 +14,36 @@ import { CartService } from '../services/cart.service';
   templateUrl: './face-analysis.component.html',
   styleUrl: './face-analysis.component.css'
 })
-export class FaceAnalysisComponent implements OnInit {
+export class FaceAnalysisComponent implements OnInit, OnDestroy {
   @ViewChild('videoElement') videoElement!: ElementRef<HTMLVideoElement>;
 
   // Signals pour l'état réactif
-  currentStep = signal<'permission' | 'camera' | 'captured' | 'analyzing' | 'results'>('permission');
+  currentStep = signal<'permission' | 'camera' | 'captured' | 'analyzing' | 'ai-analyzing' | 'results'>('permission');
   cameraReady = signal(false);
   errorMessage = signal<string | null>(null);
   modelsLoaded = signal(false);
   faceDetected = signal(false);
   analysisResults = signal<any>(null);
+  aiAnalysisResults = signal<AIAnalysisResult | null>(null);
   productRecommendations = signal<ProductRecommendation[]>([]);
   personalizedTips = signal<string[]>([]);
 
   private stream: MediaStream | null = null;
   private capturedImageData: string | null = null;
   private detectionInterval: any;
+  private destroy$ = new Subject<void>();
   private recommendationService = inject(RecommendationService);
   private cartService = inject(CartService);
+  private deepseekAI = inject(DeepseekAiService);
 
   async ngOnInit() {
     // Charger les modèles face-api.js au démarrage
     await this.loadModels();
+    
+    // Test de connexion DeepSeek AI
+    console.log('🔗 Test de connexion DeepSeek...');
+    const connectionOk = await this.deepseekAI.testConnection();
+    console.log('🤖 DeepSeek connecté:', connectionOk ? '✅' : '❌');
   }
 
   async loadModels() {
@@ -80,7 +90,7 @@ export class FaceAnalysisComponent implements OnInit {
           this.videoElement.nativeElement.srcObject = this.stream;
           this.videoElement.nativeElement.onloadedmetadata = () => {
             this.cameraReady.set(true);
-            this.startFaceDetection(); // 🎯 Nouveau : démarrer la détection
+            this.startFaceDetection();
           };
         }
       }, 100);
@@ -93,7 +103,6 @@ export class FaceAnalysisComponent implements OnInit {
     }
   }
 
-  // 🎯 NOUVELLE MÉTHODE : Détection de visage en temps réel
   startFaceDetection() {
     if (!this.videoElement || !this.modelsLoaded()) return;
 
@@ -216,6 +225,7 @@ export class FaceAnalysisComponent implements OnInit {
       const nose = landmarks.getNose();
       const leftEye = landmarks.getLeftEye();
       const rightEye = landmarks.getRightEye();
+      const mouth = landmarks.getMouth();
       
       // 🎯 NOUVELLE APPROCHE : Analyse basée sur les vraies coordonnées + timestamp
       const analysisData = this.analyzeDetailedFeatures(landmarks, faceBox, Date.now());
@@ -230,26 +240,65 @@ export class FaceAnalysisComponent implements OnInit {
         skinType: analysisData.skinType,
         faceShape: analysisData.faceShape,
         recommendations: this.generateRecommendations(analysisData.age, analysisData.skinType),
-        debugInfo: analysisData // Pour voir les calculs
+        debugInfo: analysisData
       };
 
       this.analysisResults.set(results);
       console.log('🎯 Résultats d\'analyse:', results);
 
-      // 🛒 NOUVEAU : Obtenir les vraies recommandations produits
-      const recommendations = await this.recommendationService.getRecommendations(results);
-      this.productRecommendations.set(recommendations);
-      
-      // 💡 NOUVEAU : Obtenir les conseils personnalisés
-      const tips = this.recommendationService.getPersonalizedTips(results);
-      this.personalizedTips.set(tips);
+      // 🤖 NOUVEAU : Analyse avec DeepSeek AI
+      console.log('🤖 Démarrage analyse IA avancée...');
+      this.currentStep.set('ai-analyzing');
 
-      console.log('🛍️ Recommandations produits:', recommendations);
+      // Préparer les données pour l'IA
+      const faceData: FaceAnalysisData = {
+        faceWidth,
+        faceHeight,
+        eyeDistance: Math.abs(rightEye[0].x - leftEye[3].x),
+        mouthWidth: Math.abs(mouth[6].x - mouth[0].x),
+        noseHeight: Math.abs(nose[6].y - nose[0].y),
+        jawWidth: Math.abs(jawLine[16].x - jawLine[0].x),
+        noseToEyeRatio: Math.abs(nose[0].y - ((leftEye[1].y + leftEye[2].y) / 2)) / faceHeight,
+        faceRatio: faceHeight / faceWidth,
+        jawRatio: Math.abs(jawLine[16].x - jawLine[0].x) / faceWidth,
+        confidence: detection.detection.score
+      };
+
+      try {
+        // Analyser avec DeepSeek AI
+        const aiResults = await this.deepseekAI.analyzeWithAI(faceData);
+        this.aiAnalysisResults.set(aiResults);
+        
+        console.log('🤖 Analyse IA terminée:', aiResults);
+
+        // 🛒 Obtenir les vraies recommandations produits basées sur l'IA
+        const recommendations = await this.recommendationService.getRecommendations({
+          estimatedAge: aiResults.estimatedAge,
+          skinType: aiResults.skinType,
+          faceShape: aiResults.faceShape,
+          confidence: aiResults.confidence
+        });
+        this.productRecommendations.set(recommendations);
+        
+        // 💡 Utiliser les conseils de l'IA
+        this.personalizedTips.set(aiResults.beautyTips);
+
+        console.log('🛍️ Recommandations produits IA:', recommendations);
+
+      } catch (error) {
+        console.error('❌ Erreur analyse IA:', error);
+        // Fallback sur l'analyse classique
+        const recommendations = await this.recommendationService.getRecommendations(results);
+        this.productRecommendations.set(recommendations);
+        
+        const tips = this.recommendationService.getPersonalizedTips(results);
+        this.personalizedTips.set(tips);
+      }
 
       // Transition vers les résultats
       setTimeout(() => {
         this.currentStep.set('results');
-      }, 2000);
+      }, 3000);
 
     } catch (error) {
       console.error('❌ Erreur analyse:', error);
@@ -272,7 +321,7 @@ export class FaceAnalysisComponent implements OnInit {
       const eyeCenter1 = { x: (leftEye[0].x + leftEye[3].x) / 2, y: (leftEye[1].y + leftEye[2].y) / 2 };
       const eyeCenter2 = { x: (rightEye[0].x + rightEye[3].x) / 2, y: (rightEye[1].y + rightEye[2].y) / 2 };
       
-      // Distance entre les yeux (unique pour chaque personne)
+      // Distance entre les yeux
       const eyeDistance = Math.sqrt(
         Math.pow(eyeCenter2.x - eyeCenter1.x, 2) + Math.pow(eyeCenter2.y - eyeCenter1.y, 2)
       );
@@ -319,10 +368,10 @@ export class FaceAnalysisComponent implements OnInit {
       
       // Mâchoire : plus affaissée = plus âgé (MODÉRÉ)
       const jawRatio = jawWidth / faceBox.width;
-      if (jawRatio > 0.85) ageScore += 5; // Mâchoire forte = jeune
+      if (jawRatio > 0.85) ageScore += 5;
       else if (jawRatio > 0.75) ageScore += 10;
       else if (jawRatio > 0.65) ageScore += 15;
-      else ageScore += 20; // Mâchoire affaissée = âgé
+      else ageScore += 20;
       
       // Ratio du visage (RÉDUIT)
       if (faceRatio > 1.4) ageScore += 10;
@@ -331,12 +380,12 @@ export class FaceAnalysisComponent implements OnInit {
 
       // Facteur de "complexité" faciale (RÉDUIT)
       const complexityFactor = (eyeDistance + mouthWidth + noseHeight) / 3;
-      if (complexityFactor > 75) ageScore += 10; // Seuil plus élevé
+      if (complexityFactor > 75) ageScore += 10;
       else if (complexityFactor > 65) ageScore += 5;
       else ageScore += 0;
 
       // Ajustement basé sur le hash (RÉDUIT)
-      const ageVariation = (faceHash % 20) - 10; // Variation entre -10 et +10
+      const ageVariation = (faceHash % 20) - 10;
       ageScore += ageVariation;
 
       console.log('👴 Calcul d\'âge détaillé:', {
@@ -397,7 +446,6 @@ export class FaceAnalysisComponent implements OnInit {
 
     } catch (error) {
       console.error('❌ Erreur analyse détaillée:', error);
-      // Retour par défaut
       return {
         age: "25-35 ans",
         skinType: "Peau normale",
@@ -406,181 +454,6 @@ export class FaceAnalysisComponent implements OnInit {
         faceHash: 0,
         metrics: {}
       };
-    }
-  }
-
-  private estimateAge(faceWidth: number, faceHeight: number, landmarks: any): string {
-    try {
-      // Points de repère plus précis pour l'estimation d'âge
-      const jawLine = landmarks.getJawOutline();
-      const nose = landmarks.getNose();
-      const mouth = landmarks.getMouth();
-      const leftEye = landmarks.getLeftEye();
-      const rightEye = landmarks.getRightEye();
-
-      // 1. Analyse de la largeur de la mâchoire (s'affine avec l'âge)
-      const jawWidth = Math.abs(jawLine[16].x - jawLine[0].x);
-      const jawRatio = jawWidth / faceWidth;
-
-      // 2. Distance entre les yeux (reste stable)
-      const eyeDistance = Math.abs(rightEye[0].x - leftEye[3].x);
-      const eyeToFaceRatio = eyeDistance / faceWidth;
-
-      // 3. Hauteur du nez par rapport au visage
-      const noseHeight = Math.abs(nose[6].y - nose[0].y);
-      const noseRatio = noseHeight / faceHeight;
-
-      // 4. Largeur de la bouche
-      const mouthWidth = Math.abs(mouth[6].x - mouth[0].x);
-      const mouthRatio = mouthWidth / faceWidth;
-
-      // Score composite pour l'âge
-      let ageScore = 0;
-      
-      // Jeune : mâchoire plus carrée, proportions différentes
-      if (jawRatio > 0.8) ageScore += 15;
-      if (eyeToFaceRatio > 0.3) ageScore += 10;
-      if (noseRatio < 0.2) ageScore += 15;
-      if (mouthRatio > 0.15) ageScore += 10;
-
-      // Calcul basé sur les ratios du visage
-      const faceRatio = faceHeight / faceWidth;
-      if (faceRatio > 1.4) ageScore += 20;
-      else if (faceRatio < 1.1) ageScore += 30;
-
-      console.log('🔍 Scores d\'âge:', { jawRatio, eyeToFaceRatio, noseRatio, mouthRatio, ageScore });
-
-      if (ageScore < 25) return "18-25 ans";
-      else if (ageScore < 40) return "25-35 ans";
-      else if (ageScore < 55) return "35-45 ans";
-      else return "45+ ans";
-
-    } catch (error) {
-      console.error('Erreur estimation âge:', error);
-      return "25-35 ans"; // Valeur par défaut
-    }
-  }
-
-  private async analyzeSkinType(img: HTMLImageElement, faceBox: any): Promise<string> {
-    try {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      if (!ctx) return "Peau normale";
-
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-
-      // Analyser plusieurs zones du visage
-      const zones = [
-        { name: 'front', x: faceBox.x + faceBox.width * 0.5, y: faceBox.y + faceBox.height * 0.3 },
-        { name: 'joue_gauche', x: faceBox.x + faceBox.width * 0.3, y: faceBox.y + faceBox.height * 0.6 },
-        { name: 'joue_droite', x: faceBox.x + faceBox.width * 0.7, y: faceBox.y + faceBox.height * 0.6 },
-        { name: 'nez', x: faceBox.x + faceBox.width * 0.5, y: faceBox.y + faceBox.height * 0.55 }
-      ];
-
-      let totalBrightness = 0;
-      let totalRedness = 0;
-      let totalUniformity = 0;
-      
-      zones.forEach(zone => {
-        const sampleSize = 15;
-        const imageData = ctx.getImageData(
-          zone.x - sampleSize/2, 
-          zone.y - sampleSize/2, 
-          sampleSize, 
-          sampleSize
-        );
-
-        let zoneBrightness = 0;
-        let zoneRedness = 0;
-        let rValues: number[] = [];
-
-        for (let i = 0; i < imageData.data.length; i += 4) {
-          const r = imageData.data[i];
-          const g = imageData.data[i + 1];
-          const b = imageData.data[i + 2];
-          
-          zoneBrightness += (r + g + b) / 3;
-          zoneRedness += r - ((g + b) / 2); // Indice de rougeur
-          rValues.push(r);
-        }
-
-        const pixelCount = imageData.data.length / 4;
-        zoneBrightness /= pixelCount;
-        zoneRedness /= pixelCount;
-
-        // Calculer l'uniformité (écart-type)
-        const avgR = rValues.reduce((a, b) => a + b, 0) / rValues.length;
-        const variance = rValues.reduce((sum, val) => sum + Math.pow(val - avgR, 2), 0) / rValues.length;
-        const uniformity = Math.sqrt(variance);
-
-        totalBrightness += zoneBrightness;
-        totalRedness += zoneRedness;
-        totalUniformity += uniformity;
-      });
-
-      const avgBrightness = totalBrightness / zones.length;
-      const avgRedness = totalRedness / zones.length;
-      const avgUniformity = totalUniformity / zones.length;
-
-      console.log('🎨 Analyse peau:', { avgBrightness, avgRedness, avgUniformity });
-
-      // Classification intelligente
-      if (avgBrightness > 200 && avgUniformity < 15) {
-        return "Peau claire et uniforme";
-      } else if (avgBrightness > 180 && avgRedness > 10) {
-        return "Peau claire sensible";
-      } else if (avgBrightness > 150 && avgUniformity < 20) {
-        return "Peau normale";
-      } else if (avgBrightness > 120 && avgRedness < 5) {
-        return "Peau mate";
-      } else if (avgBrightness < 100) {
-        return "Peau foncée";
-      } else {
-        return "Peau mixte";
-      }
-
-    } catch (error) {
-      console.error('Erreur analyse peau:', error);
-      return "Peau normale";
-    }
-  }
-
-  private analyzeFaceShape(jawLine: any, width: number, height: number): string {
-    try {
-      // Analyse plus précise de la forme du visage
-      const ratio = height / width;
-      
-      // Largeur de la mâchoire vs largeur maximale
-      const jawWidth = Math.abs(jawLine[16].x - jawLine[0].x);
-      const maxWidth = width;
-      const jawRatio = jawWidth / maxWidth;
-
-      // Points du haut du visage (tempes)
-      const templeWidth = Math.abs(jawLine[2].x - jawLine[14].x);
-      const templeRatio = templeWidth / maxWidth;
-
-      console.log('👤 Forme visage:', { ratio, jawRatio, templeRatio });
-
-      if (ratio > 1.5 && jawRatio < 0.7) {
-        return "Ovale allongé";
-      } else if (ratio > 1.3 && jawRatio > 0.8) {
-        return "Rectangle";
-      } else if (ratio < 1.1 && jawRatio > 0.9) {
-        return "Carré";
-      } else if (ratio < 1.2 && jawRatio < 0.75) {
-        return "Rond";
-      } else if (templeRatio > jawRatio + 0.1) {
-        return "Triangle inversé";
-      } else {
-        return "Ovale";
-      }
-
-    } catch (error) {
-      console.error('Erreur forme visage:', error);
-      return "Ovale";
     }
   }
 
@@ -608,7 +481,7 @@ export class FaceAnalysisComponent implements OnInit {
       const selectedPreventive = preventiveOptions[Math.floor(Math.random() * preventiveOptions.length)];
       recommendations.push(...selectedPreventive);
       
-    } else if (age.includes("35-45")) {
+    } else if (age.includes("35-50")) {
       const antiAgingOptions = [
         ["Sérum anti-rides intensif", "Crème nuit régénérante", "Soin yeux anti-âge"],
         ["Traitement anti-rides", "Crème raffermissante", "Contour yeux liftant"],
@@ -627,29 +500,7 @@ export class FaceAnalysisComponent implements OnInit {
       recommendations.push(...selectedMature);
     }
 
-    // Recommandations basées sur le type de peau
-    if (skinType.includes("claire")) {
-      const clearSkinBonus = ["Crème apaisante", "Protection solaire renforcée"];
-      recommendations.push(clearSkinBonus[Math.floor(Math.random() * clearSkinBonus.length)]);
-      
-    } else if (skinType.includes("sensible")) {
-      const sensitiveBonus = ["Soin hypoallergénique", "Crème sans parfum"];
-      recommendations.push(sensitiveBonus[Math.floor(Math.random() * sensitiveBonus.length)]);
-      
-    } else if (skinType.includes("mate") || skinType.includes("foncée")) {
-      const darkSkinBonus = ["Hydratant nutritif", "Sérum éclat unifiant"];
-      recommendations.push(darkSkinBonus[Math.floor(Math.random() * darkSkinBonus.length)]);
-      
-    } else if (skinType.includes("mixte")) {
-      const mixedSkinBonus = ["Gel équilibrant", "Hydratant matifiant"];
-      recommendations.push(mixedSkinBonus[Math.floor(Math.random() * mixedSkinBonus.length)]);
-      
-    } else {
-      const normalSkinBonus = ["Crème hydratante", "Soin quotidien"];
-      recommendations.push(normalSkinBonus[Math.floor(Math.random() * normalSkinBonus.length)]);
-    }
-
-    return recommendations.slice(0, 4); // Limiter à 4 recommandations
+    return recommendations.slice(0, 4);
   }
 
   resetAnalysis() {
@@ -657,6 +508,7 @@ export class FaceAnalysisComponent implements OnInit {
     this.capturedImageData = null;
     this.errorMessage.set(null);
     this.analysisResults.set(null);
+    this.aiAnalysisResults.set(null);
     this.productRecommendations.set([]);
     this.personalizedTips.set([]);
     this.faceDetected.set(false);
@@ -672,5 +524,7 @@ export class FaceAnalysisComponent implements OnInit {
   ngOnDestroy() {
     this.stopCamera();
     this.stopFaceDetection();
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

@@ -321,6 +321,161 @@ video {
   50% { opacity: 0.7; }
 }
 
+/* 🤖 NOUVEAUX STYLES : Analyse IA */
+.ai-analyzing-step {
+  text-align: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 15px;
+  color: white;
+}
+
+.ai-animation {
+  position: relative;
+  margin: 30px 0;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ai-brain {
+  font-size: 5rem;
+  animation: aiPulse 2s infinite;
+  z-index: 2;
+  position: relative;
+}
+
+@keyframes aiPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1); filter: brightness(1.3); }
+}
+
+.ai-particles {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: particleFloat 3s infinite;
+}
+
+.particle:nth-child(1) {
+  top: 20%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.particle:nth-child(2) {
+  top: 20%;
+  right: 20%;
+  animation-delay: 0.5s;
+}
+
+.particle:nth-child(3) {
+  bottom: 20%;
+  left: 20%;
+  animation-delay: 1s;
+}
+
+.particle:nth-child(4) {
+  bottom: 20%;
+  right: 20%;
+  animation-delay: 1.5s;
+}
+
+@keyframes particleFloat {
+  0%, 100% { 
+    transform: translateY(0px) scale(1);
+    opacity: 0.6;
+  }
+  50% { 
+    transform: translateY(-20px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+.ai-progress-steps {
+  margin: 30px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+}
+
+.ai-progress-steps .step {
+  padding: 12px 25px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 25px;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.ai-progress-steps .step.completed {
+  background: rgba(34, 197, 94, 0.3);
+  color: white;
+  border-color: rgba(34, 197, 94, 0.5);
+}
+
+.ai-progress-steps .step.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.ai-progress-steps .step.pulse {
+  animation: aiStepPulse 1.5s infinite;
+}
+
+@keyframes aiStepPulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+  }
+}
+
+.ai-loading-text {
+  margin-top: 25px;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.typing-text {
+  animation: typewriter 3s infinite;
+}
+
+@keyframes typewriter {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.ai-analyzing-step h3 {
+  color: white;
+  margin-bottom: 15px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.ai-analyzing-step p {
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 20px;
+}
+
 /* Nouveau : Résultats détaillés */
 .results-step {
   padding: 30px 20px;

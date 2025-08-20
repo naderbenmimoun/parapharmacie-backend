@@ -89,12 +89,38 @@
         <div class="brain-icon">🧠</div>
         <div class="scanning-line"></div>
       </div>
-      <h3>Analyse en cours...</h3>
+      <h3>Analyse Faciale en cours...</h3>
       <p>Notre IA analyse votre visage pour vous proposer les meilleurs produits</p>
       <div class="progress-steps">
         <div class="step active">🔍 Détection du visage</div>
         <div class="step active">📊 Analyse des caractéristiques</div>
-        <div class="step active">💡 Génération des recommandations</div>
+        <div class="step">🤖 Analyse IA avancée</div>
+      </div>
+    </div>
+  }
+
+  <!-- Étape 5: Analyse IA Avancée -->
+  @if (currentStep() === 'ai-analyzing') {
+    <div class="ai-analyzing-step">
+      <div class="ai-animation">
+        <div class="ai-brain">🤖</div>
+        <div class="ai-particles">
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+        </div>
+      </div>
+      <h3>🚀 Analyse IA Avancée avec DeepSeek</h3>
+      <p>Intelligence artificielle générative en action pour des recommandations ultra-précises</p>
+      <div class="ai-progress-steps">
+        <div class="step completed">✅ Détection du visage</div>
+        <div class="step completed">✅ Analyse des caractéristiques</div>
+        <div class="step active pulse">🤖 Analyse DeepSeek AI</div>
+        <div class="step">💡 Génération des recommandations</div>
+      </div>
+      <div class="ai-loading-text">
+        <span class="typing-text">Analyse des proportions faciales...</span>
       </div>
     </div>
   }
