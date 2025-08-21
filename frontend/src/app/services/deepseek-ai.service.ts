@@ -57,11 +57,11 @@ export interface AIAnalysisResult {
 })
 export class DeepseekAiService {
   private readonly API_URL = 'https://api.deepseek.com/v1/chat/completions';
-  private readonly API_KEY = 'YOUR_DEEPSEEK_API_KEY'; // Vous remplacerez ça
+  private readonly API_KEY = 'sk-a159aedecb674b40975141243a3b7190'; // ✅ VOTRE CLÉ API
 
   constructor(private http: HttpClient) {}
 
-  // Méthode pour configurer la clé API
+  // Méthode pour configurer la clé API (optionnelle maintenant)
   setApiKey(apiKey: string) {
     (this as any).API_KEY = apiKey;
   }
