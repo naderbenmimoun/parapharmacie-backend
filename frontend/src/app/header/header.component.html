@@ -39,6 +39,24 @@
                         </div>
                     }
                 </div>
+
+                <!-- Bouton Analyse Faciale Innovant -->
+                <div class="face-analysis-container">
+                    <button class="face-analysis-btn" routerLink="/face-analysis" title="Analyse Faciale IA">
+                        <div class="face-analysis-icon">
+                            <svg class="face-scan-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div class="scan-lines">
+                                <div class="scan-line"></div>
+                                <div class="scan-line"></div>
+                                <div class="scan-line"></div>
+                            </div>
+                        </div>
+                        <span class="face-analysis-text">IA Analyse</span>
+                        <div class="pulse-ring"></div>
+                    </button>
+                </div>
                 
                 <!-- Angular: (click)="openCart()" -->
             <!--    <svg class="header-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -80,6 +98,11 @@
                     {{category}}
                 </a>
             }
+            <!-- Lien Analyse Faciale dans la navigation -->
+            <a class="nav-item nav-item-special" routerLink="/face-analysis">
+                <span class="nav-icon">🔍</span>
+                Analyse Faciale IA
+            </a>
         </div>
     </div>
 </nav>
