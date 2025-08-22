@@ -10,6 +10,7 @@ import { ForgotPasswordComponent } from './forgot-password/forgot-password.compo
 import { CheckoutComponent } from './checkout/checkout.component';
 import { OrderConfirmationComponent } from './order-confirmation/order-confirmation.component';
 import { FaceAnalysisComponent } from './face-analysis/face-analysis.component';
+import { ProfileComponent } from './profile/profile.component';
 
 
 export const routes: Routes = [
@@ -25,5 +26,6 @@ export const routes: Routes = [
     { path: "favorites", title: "Mes Favoris", component: FavoritesComponent },
     { path: "product_detail", title: "Product_detail", component: ProductDetailComponent },
     { path: "forgotPassword", title: "forgotPassword", component: ForgotPasswordComponent },
-    { path: "face-analysis", title: "Analyse Faciale", component: FaceAnalysisComponent }
+    { path: "face-analysis", title: "Analyse Faciale", component: FaceAnalysisComponent },
+    { path: "profile", title: "Mon Profil", component: ProfileComponent }
 ];

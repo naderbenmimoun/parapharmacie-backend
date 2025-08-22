@@ -437,6 +437,29 @@
   text-overflow: ellipsis;
 }
 
+.user-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-link {
+  color: #4CAF50;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.profile-link:hover {
+  background-color: #f0f8f0;
+  border-color: #4CAF50;
+  transform: translateY(-1px);
+}
+
 .logout-button {
   background-color: #4CAF50;
   border: none;

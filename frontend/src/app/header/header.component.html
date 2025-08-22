@@ -52,7 +52,10 @@
   <div class="user-section" *ngIf="userName(); else loginLinks">
   <div class="user-info">
     <div class="user-name">{{ userName() }}</div>
-    <button class="logout-button" (click)="logout()">Déconnexion</button>
+    <div class="user-actions">
+      <a routerLink="/profile" class="profile-link">Mon Profil</a>
+      <button class="logout-button" (click)="logout()">Déconnexion</button>
+    </div>
   </div>
 </div>
 
